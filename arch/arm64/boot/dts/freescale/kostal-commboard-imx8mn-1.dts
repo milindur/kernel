@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2022 KOSTAL Industrie Elektrik GmbH. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/dts-v1/;
+// This is our i.MX8MN commboard, as deployed in Mennekes AC project
+
+#include "kostal-commboard-imx8mn-1.dtsi"
+#include "cb-mx8mn-can0.dtsi"
+#include "cb-mx8mn-can1.dtsi"
+#include "cb-mx8mn-qca7k.dtsi"
+#include "cb-mx8mn-nci-rfid.dtsi"
+#include "cb-mx8mn-sd8801-wifi.dtsi"
+#include "cb-mx8mn-usb-wwan.dtsi"
+#include "cb-mx8mn-rpi-display.dtsi"

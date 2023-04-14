@@ -1,0 +1,98 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2020 PHYTEC Messtechnik GmbH
+ * Copyright (c) 2022 KOSTAL Industrie Elektrik GmbH. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/ {
+    reg_can0_en: regulator-can0-en {
+        compatible = "regulator-fixed";
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_can0_en>;
+        regulator-name = "reg_can0_en";
+        regulator-min-microvolt = <3300000>;
+        regulator-max-microvolt = <3300000>;
+        gpio = <&gpio1 9 GPIO_ACTIVE_LOW>;
+        startup-delay-us = <20>;
+    };
+
+    clocks {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        can0_osc_20m: can-clock@0 {
+            compatible = "fixed-clock";
+            reg = <0>;
+            #clock-cells = <0>;
+            clock-frequency = <20000000>;
+            clock-output-names = "can_osc_20m";
+        };
+    };
+};
+
+/* can0 mcp2518fd */
+&ecspi2 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_ecspi2 &pinctrl_ecspi2_cs>;
+    cs-gpios = <&gpio5 13 GPIO_ACTIVE_LOW>;
+    status = "okay";
+
+    assigned-clocks = <&clk IMX8MN_CLK_ECSPI2_ROOT>;
+    assigned-clock-rates = <8333333>;
+
+    can0: can@0 {
+        compatible = "microchip,mcp251xfd";
+        reg = <0>;
+        spi-max-frequency = <20000000>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_can0_int>;
+        interrupt-parent = <&gpio1>;
+        interrupts = <8 IRQ_TYPE_LEVEL_LOW>;
+        clocks = <&can0_osc_20m>;
+        xceiver-supply = <&reg_can0_en>;
+    };
+};
+
+&iomuxc {
+    pinctrl-names = "default";
+
+    imx8mn-evk {
+        pinctrl_can0_en: can0-engrp {
+            fsl,pins = <
+                MX8MN_IOMUXC_GPIO1_IO09_GPIO1_IO9       0x00
+            >;
+        };
+
+        pinctrl_can0_int: can0-intgrp {
+            fsl,pins = <
+                MX8MN_IOMUXC_GPIO1_IO08_GPIO1_IO8       0x00
+            >;
+        };
+
+        pinctrl_ecspi2: ecspi2grp {
+            fsl,pins = <
+                MX8MN_IOMUXC_ECSPI2_SCLK_ECSPI2_SCLK    0x82
+                MX8MN_IOMUXC_ECSPI2_MOSI_ECSPI2_MOSI    0x82
+                MX8MN_IOMUXC_ECSPI2_MISO_ECSPI2_MISO    0x82
+            >;
+        };
+
+        pinctrl_ecspi2_cs: ecspi2csgrp {
+            fsl,pins = <
+                MX8MN_IOMUXC_ECSPI2_SS0_GPIO5_IO13      0x00
+            >;
+        };
+    };
+};

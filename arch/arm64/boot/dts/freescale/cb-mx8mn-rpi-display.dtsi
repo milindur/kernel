@@ -1,0 +1,100 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/ {
+    panel_disp1: panel_disp1@0 {
+        reg = <0>;
+        compatible = "raspberrypi,7inch-dsi", "simple-panel";
+        backlight = <&reg_display>;
+        power-supply = <&reg_display>;
+
+        port {
+            panel_in: endpoint {
+                remote-endpoint = <&bridge_out>;
+            };
+        };
+    };
+
+    reg_bridge: reg_bridge@0 {
+        reg = <0>;
+        compatible = "regulator-fixed";
+        regulator-name = "bridge_reg";
+        gpio = <&reg_display 0 0>;
+        vin-supply = <&reg_display>;
+        enable-active-high;
+    };
+};
+
+&i2c3 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+    status = "okay";
+
+    ft5406: ts@38 {
+        compatible = "edt,edt-ft5506";
+        reg = <0x38>;
+        vcc-supply = <&reg_display>;
+        reset-gpio = <&reg_display 1 1>;
+
+        touchscreen-size-x = < 800 >;
+        touchscreen-size-y = < 480 >;
+        touchscreen-inverted-x;
+        touchscreen-inverted-y;
+    };
+
+    reg_display: reg_display@45 {
+        compatible = "raspberrypi,7inch-touchscreen-panel-regulator";
+        reg = <0x45>;
+        gpio-controller;
+        #gpio-cells = <2>;
+    };
+};
+
+&lcdif {
+	status = "okay";
+};
+
+&gpu {
+	status = "disabled";
+};
+
+&dsi {
+    status = "okay";
+
+    bridge@0 {
+        reg = <0>;
+        compatible = "toshiba,tc358762";
+        vddc-supply = <&reg_bridge>;
+        #address-cells = <1>;
+		#size-cells = <0>;
+        status = "okay";
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+                bridge_in: endpoint {
+                    remote-endpoint = <&dsi_out>;
+                };
+            };
+
+            port@1 {
+                reg = <1>;
+                bridge_out: endpoint {
+                    remote-endpoint = <&panel_in>;
+                };
+            };
+        };
+    };
+
+    ports {
+        port@1 {
+            reg = <1>;
+
+            dsi_out: endpoint {
+                remote-endpoint = <&bridge_in>;
+            };
+        };
+    };
+};

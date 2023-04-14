@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2022 KOSTAL Industrie Elektrik GmbH. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&ecspi1 {
+   #address-cells = <1>;
+   #size-cells = <0>;
+   fsl,spi-num-chipselects = <1>;
+   pinctrl-names = "default";
+   pinctrl-0 = <&pinctrl_ecspi1 &pinctrl_ecspi1_cs>;
+   cs-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>;
+
+   status = "okay";
+
+   assigned-clocks = <&clk IMX8MN_CLK_ECSPI1_ROOT>;
+   assigned-clock-rates = <12000000>;
+
+   /* https://www.kernel.org/doc/Documentation/devicetree/bindings/net/qca-qca7000-spi.txt */
+   qca7000: qca@0 {
+           compatible = "qca,qca7000";
+           reg = <0x0>;
+           pinctrl-names = "default";
+           pinctrl-0 = <&pinctrl_qca_spi>;
+           interrupt-parent = <&gpio5>;             /* GPIO Bank 5 */
+           interrupts = <28 IRQ_TYPE_EDGE_RISING>;  /* GPIO5_IO28, rising edge; try LEVEL_HIGH instead */
+           spi-cpha;                                /* SPI mode: CPHA=1 */
+           spi-cpol;                                /* SPI mode: CPOL=1 */
+           spi-max-frequency = <12000000>;          /* freq: 12 MHz */
+   };
+};
+
+&iomuxc {
+    imx8mn-evk {
+        pinctrl_ecspi1: ecspi1grp {
+            fsl,pins = <
+                MX8MN_IOMUXC_ECSPI1_SCLK_ECSPI1_SCLK    0x82
+                MX8MN_IOMUXC_ECSPI1_MOSI_ECSPI1_MOSI    0x82
+                MX8MN_IOMUXC_ECSPI1_MISO_ECSPI1_MISO    0x82
+            >;
+        };
+
+        pinctrl_ecspi1_cs: ecspi1csgrp {
+            fsl,pins = <
+                MX8MN_IOMUXC_ECSPI1_SS0_GPIO5_IO9       0x0
+                // MX8MN_IOMUXC_ECSPI1_SS0_ECSPI1_SS0   0x0 /* not working due to spi-imx bug */
+            >;
+        };
+
+        pinctrl_qca_spi: qca_spigrp {
+            fsl,pins = <
+                MX8MN_IOMUXC_UART4_RXD_GPIO5_IO28       0x0 /* IRQ */
+            >;
+        };
+    };
+};

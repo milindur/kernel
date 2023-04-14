@@ -1,0 +1,34 @@
+&gpio1 {
+	wwan-modem {
+		status = "okay";
+		gpio-hog;
+		gpios = <14 0>;
+		output-high;
+		line-name = "modem-reset";
+		pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_wwan>;
+	};
+};
+
+&iomuxc {
+    imx8mn-evk {
+        pinctrl_wwan: wwangrp {
+            fsl,pins = <
+                /* /PERST */
+                MX8MN_IOMUXC_GPIO1_IO14_GPIO1_IO14	0x00
+            >;
+        };
+    };
+};
+
+&usbotg1 {
+	picophy,pre-emp-curr-control = <3>;
+	picophy,dc-vol-level-adjust = <7>;
+	dr_mode = "host";
+	disable-over-current;
+	tpl-support;
+	hnp-disable;
+	srp-disable;
+	adp-disable;
+	status = "okay";
+};
